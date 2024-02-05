@@ -1,0 +1,85 @@
+// Relations example:
+// userId String @db.ObjectId
+// user User @relation(fields: [userId], references: [id])
+
+// datas  data[]
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model User {
+  id              String            @id @default(cuid())
+  name            String
+  email           String            @unique
+  image           String?
+  createAt        DateTime          @default(now())
+  updateAt        DateTime          @default(now())
+  hash            String
+  accounts        Account[]
+  transactions    Transactions[]
+  PersonalFinance PersonalFinance[]
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model PersonalFinance {
+  id         String   @id @default(uuid())
+  createAt   DateTime @default(now())
+  updateAt   DateTime @default(now())
+  balance    Decimal
+  incomeSum  Decimal
+  outcomeSum Decimal
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String
+
+  @@index([userId])
+}
+
+model Transactions {
+  id       String   @id @default(uuid())
+  createAt DateTime @default(now())
+  updateAt DateTime @default(now())
+  sum      Decimal
+  type     String
+  category String
+  user     User     @relation(fields: [userId], references: [id])
+  userId   String
+
+  @@index([userId])
+}
+
+// model Suitcase {
+//   PersonalFinance PersonalFinance
+//   Commitments Commitments
+// }
+
+// model Commitments {
+
+// }
