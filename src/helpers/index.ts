@@ -5,3 +5,9 @@ export const hashPassword = (password: string) => {
 
 	return hash
 }
+
+export const checkPassword = (password: string, hash: string) => {
+	const passwordMatch = bcrypt.compare(password, hash)
+
+	return passwordMatch
+}
