@@ -14,6 +14,11 @@ datasource db {
   relationMode = "prisma"
 }
 
+enum UserRole {
+  ADMIN
+  USER
+}
+
 model User {
   id              String            @id @default(cuid())
   name            String
@@ -22,6 +27,7 @@ model User {
   createAt        DateTime          @default(now())
   updateAt        DateTime          @default(now())
   hash            String
+  role            UserRole          @default(USER)
   accounts        Account[]
   transactions    Transactions[]
   PersonalFinance PersonalFinance[]
