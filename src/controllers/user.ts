@@ -1,4 +1,5 @@
 import express from 'express'
+import * as z from 'zod'
 import { getUserById } from '../data/user'
 
 export const findUserById = async (
@@ -16,3 +17,8 @@ export const findUserById = async (
 		return res.sendStatus(400)
 	}
 }
+
+export const changeUserSettings = async (
+	req: express.Request,
+	res: express.Response,
+) => {}
