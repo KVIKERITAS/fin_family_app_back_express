@@ -21,3 +21,7 @@ export const SignUpSchema = z
 		message: "Passwords don't match",
 		path: ['pwRepeat'],
 	})
+
+export const SettingsSchema = z.object({
+	name: z.optional(z.string()),
+})
