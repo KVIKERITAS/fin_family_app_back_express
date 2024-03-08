@@ -19,6 +19,18 @@ enum UserRole {
   USER
 }
 
+enum PaymentFrequency {
+  yearly
+  quarterly
+  montly
+}
+
+enum Currency {
+  EUR
+  USD
+  GBP
+}
+
 model User {
   id              String            @id @default(cuid())
   name            String
@@ -31,6 +43,10 @@ model User {
   accounts        Account[]
   transactions    Transactions[]
   PersonalFinance PersonalFinance[]
+  Comitments      Commitments[]
+  Fire            Fire[]
+  bucketList      bucketList[]
+  newYearGoals    newYearGoals[]
 
   @@map("users")
 }
@@ -86,6 +102,116 @@ model Transactions {
 //   Commitments Commitments
 // }
 
-// model Commitments {
+model Commitments {
+  id        String           @id @default(uuid())
+  type      String
+  name      String
+  start     DateTime
+  end       DateTime
+  fee_type  PaymentFrequency
+  fee       Decimal
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @default(now())
+  user      User             @relation(fields: [userId], references: [id])
+  userId    String
 
-// }
+  @@index([userId])
+}
+
+model Fire {
+  id               String             @id @default(uuid())
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @default(now())
+  user             User               @relation(fields: [userId], references: [id])
+  userId           String
+  toHave           toHave[]
+  retirementIncome retirementIncome[]
+  Lifestyle        Lifestyle[]
+
+  @@index([userId])
+}
+
+model toHave {
+  id             String   @id @default(uuid())
+  name           String
+  initialPayment Decimal
+  monthlyPayment Decimal
+  monthlyCost    Decimal
+  currency       String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @default(now())
+  fire           Fire     @relation(fields: [fireId], references: [id])
+  fireId         String
+
+  @@index([fireId])
+}
+
+model retirementIncome {
+  id               String   @id @default(uuid())
+  incomeName       String
+  incomePaymentSum Decimal
+  incomeStartDate  DateTime
+  currency         Currency
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @default(now())
+  fire             Fire     @relation(fields: [fireId], references: [id])
+  fireId           String
+
+  @@index([fireId])
+}
+
+model Lifestyle {
+  id          String   @id @default(uuid())
+  name        String
+  monthlyCost Decimal
+  currency    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+  fire        Fire     @relation(fields: [fireId], references: [id])
+  fireId      String
+
+  @@index([fireId])
+}
+
+model bucketList {
+  id             String   @id @default(uuid())
+  name           String
+  estimated_Date DateTime
+  cost           Decimal
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @default(now())
+  complited      Boolean
+  user           User     @relation(fields: [userId], references: [id])
+  userId         String
+
+  @@index([userId])
+}
+
+model newYearGoals {
+  id             String     @id @default(uuid())
+  name           String
+  estimated_Date DateTime
+  cost           Decimal
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @default(now())
+  completed      Boolean
+  user           User       @relation(fields: [userId], references: [id])
+  userId         String
+  subGoals       subGoals[]
+
+  @@index([userId])
+}
+
+model subGoals {
+  id             String       @id @default(uuid())
+  name           String
+  estimated_Date DateTime
+  cost           Decimal
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @default(now())
+  complited      Boolean
+  subgoal        newYearGoals @relation(fields: [newYearGoalsId], references: [id])
+  newYearGoalsId String
+
+  @@index([newYearGoalsId])
+}
