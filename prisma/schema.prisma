@@ -19,6 +19,23 @@ enum UserRole {
   USER
 }
 
+enum PaymentFrequency {
+  yearly
+  quarterly
+  montly
+}
+
+enum Currency {
+  EUR
+  USD
+  GBP
+}
+
+enum metalState {
+  metal
+  paper
+}
+
 model User {
   id              String            @id @default(cuid())
   name            String
@@ -31,6 +48,16 @@ model User {
   accounts        Account[]
   transactions    Transactions[]
   PersonalFinance PersonalFinance[]
+  Comitments      Commitments[]
+  Fire            Fire[]
+  bucketList      BucketList[]
+  newYearGoals    NewYearGoals[]
+  cashAsset       CashAsset[]
+  equitiesAsset   EquitiesAsset[]
+  bondAsset       BondAsset[]
+  realEstate      RealEstate[]
+  metals          Metals[]
+  crypto          Crypto[]
 
   @@map("users")
 }
@@ -86,6 +113,268 @@ model Transactions {
 //   Commitments Commitments
 // }
 
-// model Commitments {
+model Commitments {
+  id        String           @id @default(uuid())
+  type      String
+  name      String
+  start     DateTime
+  end       DateTime
+  fee_type  PaymentFrequency
+  fee       Decimal
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @default(now())
+  user      User             @relation(fields: [userId], references: [id])
+  userId    String
 
-// }
+  @@index([userId])
+}
+
+model Fire {
+  id               String             @id @default(uuid())
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @default(now())
+  user             User               @relation(fields: [userId], references: [id])
+  userId           String
+  toHave           ToHave[]
+  retirementIncome RetirementIncome[]
+  Lifestyle        Lifestyle[]
+
+  @@index([userId])
+}
+
+model ToHave {
+  id             String   @id @default(uuid())
+  name           String
+  initialPayment Decimal
+  monthlyPayment Decimal
+  monthlyCost    Decimal
+  currency       Currency
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @default(now())
+  fire           Fire     @relation(fields: [fireId], references: [id])
+  fireId         String
+
+  @@index([fireId])
+}
+
+model RetirementIncome {
+  id               String   @id @default(uuid())
+  incomeName       String
+  incomePaymentSum Decimal
+  incomeStartDate  DateTime
+  currency         Currency
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @default(now())
+  fire             Fire     @relation(fields: [fireId], references: [id])
+  fireId           String
+
+  @@index([fireId])
+}
+
+model Lifestyle {
+  id          String   @id @default(uuid())
+  name        String
+  monthlyCost Decimal
+  currency    Currency
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+  fire        Fire     @relation(fields: [fireId], references: [id])
+  fireId      String
+
+  @@index([fireId])
+}
+
+model BucketList {
+  id             String   @id @default(uuid())
+  name           String
+  estimated_Date DateTime
+  cost           Decimal
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @default(now())
+  complited      Boolean
+  user           User     @relation(fields: [userId], references: [id])
+  userId         String
+
+  @@index([userId])
+}
+
+model NewYearGoals {
+  id             String     @id @default(uuid())
+  name           String
+  estimated_Date DateTime
+  cost           Decimal
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @default(now())
+  completed      Boolean
+  user           User       @relation(fields: [userId], references: [id])
+  userId         String
+  subGoals       SubGoals[]
+
+  @@index([userId])
+}
+
+model SubGoals {
+  id             String       @id @default(uuid())
+  name           String
+  estimated_Date DateTime
+  cost           Decimal
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @default(now())
+  complited      Boolean
+  goal           NewYearGoals @relation(fields: [newYearGoalId], references: [id])
+  newYearGoalId  String
+
+  @@index([newYearGoalId])
+}
+
+model CashAsset {
+  id           String   @id @default(uuid())
+  category     String
+  currency     Currency
+  storedPlace  String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now())
+  interestRate Decimal
+  amount       Decimal
+  user         User     @relation(fields: [userId], references: [id])
+  userId       String
+
+  @@index([userId])
+}
+
+model EquitiesAsset {
+  id                       String   @id @default(uuid())
+  category                 String
+  stockTicker              String
+  stockTickerLogo          String? // TODO: this will neeed to be a file (link to google cloud storage or smthg?)
+  storedPlace              String
+  storedPlaceLogo          String? // TODO: this will neeed to be a file (link to google cloud storage or smthg?)
+  initialCost              Decimal
+  currency                 Currency
+  transactionCostBought    Decimal
+  currencyExangeCostBought Decimal
+  transactionCostSold      Decimal
+  currencyExangeCosSold    Decimal
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @default(now())
+  // dividentsPayed [] TODO: this will be a relation to a new model or we store it here?
+  amount                   Decimal
+  user                     User     @relation(fields: [userId], references: [id])
+  userId                   String
+
+  @@index([userId])
+}
+
+model BondAsset {
+  id                       String   @id @default(uuid())
+  category                 String
+  bondTicker               String
+  bondTickerLogo           String? // TODO: this will neeed to be a file (link to google cloud storage or smthg?)
+  storedPlace              String
+  storedPlaceLogo          String? // TODO: this will neeed to be a file (link to google cloud storage or smthg?)
+  initialCost              Decimal
+  currency                 Currency
+  transactionCostBought    Decimal
+  currencyExangeCostBought Decimal
+  transactionCostSold      Decimal
+  currencyExangeCosSold    Decimal
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @default(now())
+  // dividentsPayed [] TODO: this will be a relation to a new model or we store it here?
+  dateFordividents         DateTime
+  amount                   Decimal
+  user                     User     @relation(fields: [userId], references: [id])
+  userId                   String
+
+  @@index([userId])
+}
+
+model RealEstate {
+  id                      String    @id @default(uuid())
+  realEstateType          String
+  name                    String
+  adress                  String
+  totalPrice              Decimal
+  currentPriceEstimation  Decimal
+  initialCostPayed        Decimal
+  morgageId               String
+  acquiringRealEstateCost Decimal
+  realEstatetaxes         Decimal
+  // maintananceCosts [] TODO: this will be a relation to a new model or we store it here?
+  // utilityCosts [] TODO: this will be a relation to a new model or we store it here?
+  transactionCostSold     Decimal
+  currencyExangeCosSold   Decimal
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @default(now())
+  rentSum                 Decimal
+  user                    User      @relation(fields: [userId], references: [id])
+  userId                  String
+  morgage                 Morgage[]
+
+  @@index([userId])
+}
+
+model Morgage {
+  id                      String     @id @default(uuid())
+  morgageStartDate        DateTime
+  morgageEndDate          DateTime
+  morgageProvider         String
+  morgageSum              Decimal
+  interstetOnMorgageTotal Decimal
+  interstetChangeDate     DateTime
+  bankInterest            Decimal
+  euriborInterest         Decimal
+  morgageMonthlyPayments  Decimal
+  currency                Currency
+  createdAt               DateTime   @default(now())
+  updatedAt               DateTime   @default(now())
+  realEstate              RealEstate @relation(fields: [realEstateId], references: [id])
+  realEstateId            String
+
+  @@index([realEstateId])
+}
+
+model Metals {
+  id                       String     @id @default(uuid())
+  metalType                String
+  metalLogo                String? // TODO: this will neeed to be a file (link to google cloud storage or smthg?)
+  metalstate               metalState // metal or paper
+  storedPlace              String
+  storedPlaceLogo          String? // TODO: this will neeed to be a file (link to google cloud storage or smthg?)
+  initialCost              Decimal
+  currency                 Currency
+  transactionCostBought    Decimal
+  currencyExangeCostBought Decimal
+  transactionCostSold      Decimal
+  currencyExangeCosSold    Decimal
+  createdAt                DateTime   @default(now())
+  updatedAt                DateTime   @default(now())
+  units                    Decimal
+  karats                   Decimal
+  user                     User       @relation(fields: [userId], references: [id])
+  userId                   String
+
+  @@index([userId])
+}
+
+model Crypto {
+  id                       String   @id @default(uuid())
+  cryptoTicker             String
+  cryptoTickerLogo         String? // TODO: this will neeed to be a file (link to google cloud storage or smthg?)
+  storedPlace              String
+  storedPlaceLogo          String? // TODO: this will neeed to be a file (link to google cloud storage or smthg?)
+  initialCost              Decimal
+  currency                 Currency
+  transactionCostBought    Decimal
+  currencyExangeCostBought Decimal
+  transactionCostSold      Decimal
+  currencyExangeCosSold    Decimal
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @default(now())
+  // dividentsPayed [] TODO: this will be a relation to a new model or we store it here?
+  amount                   Decimal
+  user                     User     @relation(fields: [userId], references: [id])
+  userId                   String
+
+  @@index([userId])
+}
