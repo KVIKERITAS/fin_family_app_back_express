@@ -3,7 +3,7 @@ import cors from 'cors'
 import * as dotenv from 'dotenv'
 import express from 'express'
 import http from 'http'
-import router from './router'
+import MyUserRoute from './routes/MyUserRoute'
 
 dotenv.config()
 
@@ -15,8 +15,8 @@ app.use(bodyParser.json())
 
 const server = http.createServer(app)
 
+app.use('/api/my/user', MyUserRoute)
+
 server.listen(PORT, () => {
 	console.log(`Server running on http://localhost:${PORT}`)
 })
-
-app.use('/api', router())

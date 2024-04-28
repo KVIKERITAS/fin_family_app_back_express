@@ -9,9 +9,8 @@ generator client {
 }
 
 datasource db {
-  provider     = "mysql"
-  url          = env("DATABASE_URL")
-  relationMode = "prisma"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 // TODO: check all enums
@@ -144,433 +143,437 @@ enum WhoPaid {
 }
 
 model User {
-  id              String            @id @default(cuid())
-  name            String
-  email           String            @unique
-  image           String?
-  createAt        DateTime          @default(now())
-  updateAt        DateTime          @default(now())
-  hash            String
-  role            UserRole          @default(USER)
-  accounts        Account[]
-  transactions    Transactions[]
-  PersonalFinance PersonalFinance[]
-  Comitments      Commitments[]
-  Fire            Fire[]
-  bucketList      BucketList[]
-  newYearGoals    NewYearGoals[]
-  cashAsset       CashAsset[]
-  equitiesAsset   EquitiesAsset[]
-  bondAsset       BondAsset[]
-  realEstate      RealEstate[]
-  metals          Metals[]
-  crypto          Crypto[]
+  id      String  @id @default(cuid())
+  auth0Id String  @unique
+  email   String  @unique
+  name    String?
+  // id              String            @id @default(cuid())
+  // name            String
+  // email           String            @unique
+  // image           String?
+  // createAt        DateTime          @default(now())
+  // updateAt        DateTime          @default(now())
+  // hash            String
+  // role            UserRole          @default(USER)
+  // accounts        Account[]
+  // transactions    Transactions[]
+  // PersonalFinance PersonalFinance[]
+  // Comitments      Commitments[]
+  // Fire            Fire[]
+  // bucketList      BucketList[]
+  // newYearGoals    NewYearGoals[]
+  // cashAsset       CashAsset[]
+  // equitiesAsset   EquitiesAsset[]
+  // bondAsset       BondAsset[]
+  // realEstate      RealEstate[]
+  // metals          Metals[]
+  // crypto          Crypto[]
 
   @@map("users")
 }
 
-model Account {
-  id                String  @id @default(cuid())
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String? @db.Text
-  session_state     String?
+// model Account {
+//   id                String  @id @default(cuid())
+//   userId            String
+//   type              String
+//   provider          String
+//   providerAccountId String
+//   refresh_token     String? @db.Text
+//   access_token      String? @db.Text
+//   expires_at        Int?
+//   token_type        String?
+//   scope             String?
+//   id_token          String? @db.Text
+//   session_state     String?
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+//   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([provider, providerAccountId])
-  @@index([userId])
-}
-
-// TODO: Question: why do we need personal finance table? should be enough to have transactions table
-model PersonalFinance {
-  id         String   @id @default(uuid())
-  createAt   DateTime @default(now())
-  updateAt   DateTime @default(now())
-  balance    Int // this should be calculated from transactions
-  incomeSum  Int // this should be calculated from transactions
-  outcomeSum Int // this should be calculated from transactions
-  user       User     @relation(fields: [userId], references: [id])
-  userId     String
-
-  @@index([userId])
-}
-
-model Transactions {
-  id          String              @id @default(uuid())
-  sum         Int
-  type        TransactionType
-  category    TransactionCategory
-  description String?
-  currency    Currency            @default(EUR)
-  createAt    DateTime            @default(now())
-  updateAt    DateTime            @default(now())
-  user        User                @relation(fields: [userId], references: [id])
-  userId      String
-
-  @@index([userId])
-}
-
-// model Suitcase {
-//   PersonalFinance PersonalFinance
-//   Commitments Commitments
+//   @@unique([provider, providerAccountId])
+//   @@index([userId])
 // }
 
-model Commitments {
-  id               String           @id @default(uuid())
-  type             CommitmentType
-  name             String
-  initial_payment  Int?
-  commitment_start DateTime         @default(now())
-  commitment_end   DateTime?
-  payment_date     DateTime         @default(now())
-  currency         Currency         @default(EUR)
-  fee_type         PaymentFrequency
-  fee              Int //TODO:  why did we left price in the table too?
-  interest_rate    Int?
-  // sum_left         Int // TODO: this should be calculated from the initial_payment and payments made so far and months left to pay?
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @default(now())
-  user             User             @relation(fields: [userId], references: [id])
-  userId           String
+// // TODO: Question: why do we need personal finance table? should be enough to have transactions table
+// model PersonalFinance {
+//   id         String   @id @default(uuid())
+//   createAt   DateTime @default(now())
+//   updateAt   DateTime @default(now())
+//   balance    Int // this should be calculated from transactions
+//   incomeSum  Int // this should be calculated from transactions
+//   outcomeSum Int // this should be calculated from transactions
+//   user       User     @relation(fields: [userId], references: [id])
+//   userId     String
 
-  @@index([userId])
-}
+//   @@index([userId])
+// }
 
-// TODO: Question: why do we need fire table? should be enough to have toHave, retirementIncome and lifestyle tables
-model Fire {
-  id               String             @id @default(uuid())
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @default(now())
-  user             User               @relation(fields: [userId], references: [id])
-  userId           String
-  toHave           ToHave[]
-  retirementIncome RetirementIncome[]
-  Lifestyle        Lifestyle[]
+// model Transactions {
+//   id          String              @id @default(uuid())
+//   sum         Int
+//   type        TransactionType
+//   category    TransactionCategory
+//   description String?
+//   currency    Currency            @default(EUR)
+//   createAt    DateTime            @default(now())
+//   updateAt    DateTime            @default(now())
+//   user        User                @relation(fields: [userId], references: [id])
+//   userId      String
 
-  @@index([userId])
-}
+//   @@index([userId])
+// }
 
-model ToHave {
-  id             String   @id @default(uuid())
-  name           String
-  initialPayment Int
-  monthlyPayment Int
-  monthlyCost    Int
-  price          Int
-  interesRate    Int
-  monthsNeeded   Int
-  currency       Currency @default(EUR)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @default(now())
-  fire           Fire     @relation(fields: [fireId], references: [id])
-  fireId         String
+// // model Suitcase {
+// //   PersonalFinance PersonalFinance
+// //   Commitments Commitments
+// // }
 
-  @@index([fireId])
-}
+// model Commitments {
+//   id               String           @id @default(uuid())
+//   type             CommitmentType
+//   name             String
+//   initial_payment  Int?
+//   commitment_start DateTime         @default(now())
+//   commitment_end   DateTime?
+//   payment_date     DateTime         @default(now())
+//   currency         Currency         @default(EUR)
+//   fee_type         PaymentFrequency
+//   fee              Int //TODO:  why did we left price in the table too?
+//   interest_rate    Int?
+//   // sum_left         Int // TODO: this should be calculated from the initial_payment and payments made so far and months left to pay?
+//   createdAt        DateTime         @default(now())
+//   updatedAt        DateTime         @default(now())
+//   user             User             @relation(fields: [userId], references: [id])
+//   userId           String
 
-model RetirementIncome {
-  id          String   @id @default(uuid())
-  name        String
-  payment_sum Int
-  start_date  DateTime
-  currency    Currency @default(EUR)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @default(now())
-  fire        Fire     @relation(fields: [fireId], references: [id])
-  fireId      String
+//   @@index([userId])
+// }
 
-  @@index([fireId])
-}
+// // TODO: Question: why do we need fire table? should be enough to have toHave, retirementIncome and lifestyle tables
+// model Fire {
+//   id               String             @id @default(uuid())
+//   createdAt        DateTime           @default(now())
+//   updatedAt        DateTime           @default(now())
+//   user             User               @relation(fields: [userId], references: [id])
+//   userId           String
+//   toHave           ToHave[]
+//   retirementIncome RetirementIncome[]
+//   Lifestyle        Lifestyle[]
 
-model Lifestyle {
-  id           String   @id @default(uuid())
-  name         String
-  monthly_cost Int
-  currency     Currency @default(EUR)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @default(now())
-  fire         Fire     @relation(fields: [fireId], references: [id])
-  fireId       String
+//   @@index([userId])
+// }
 
-  @@index([fireId])
-}
+// model ToHave {
+//   id             String   @id @default(uuid())
+//   name           String
+//   initialPayment Int
+//   monthlyPayment Int
+//   monthlyCost    Int
+//   price          Int
+//   interesRate    Int
+//   monthsNeeded   Int
+//   currency       Currency @default(EUR)
+//   createdAt      DateTime @default(now())
+//   updatedAt      DateTime @default(now())
+//   fire           Fire     @relation(fields: [fireId], references: [id])
+//   fireId         String
 
-model BucketList {
-  id             String   @id @default(uuid())
-  name           String
-  estimated_date DateTime
-  cost           Int
-  currency       Currency @default(EUR)
-  completed      Boolean  @default(false)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @default(now())
-  user           User     @relation(fields: [userId], references: [id])
-  userId         String
+//   @@index([fireId])
+// }
 
-  @@index([userId])
-}
+// model RetirementIncome {
+//   id          String   @id @default(uuid())
+//   name        String
+//   payment_sum Int
+//   start_date  DateTime
+//   currency    Currency @default(EUR)
+//   createdAt   DateTime @default(now())
+//   updatedAt   DateTime @default(now())
+//   fire        Fire     @relation(fields: [fireId], references: [id])
+//   fireId      String
 
-model NewYearGoals {
-  id             String     @id @default(uuid())
-  name           String
-  estimated_date DateTime
-  cost           Int
-  curency        Currency   @default(EUR)
-  completed      Boolean    @default(false)
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @default(now())
-  user           User       @relation(fields: [userId], references: [id])
-  userId         String
-  subGoals       SubGoals[]
+//   @@index([fireId])
+// }
 
-  @@index([userId])
-}
+// model Lifestyle {
+//   id           String   @id @default(uuid())
+//   name         String
+//   monthly_cost Int
+//   currency     Currency @default(EUR)
+//   createdAt    DateTime @default(now())
+//   updatedAt    DateTime @default(now())
+//   fire         Fire     @relation(fields: [fireId], references: [id])
+//   fireId       String
 
-model SubGoals {
-  id             String       @id @default(uuid())
-  name           String
-  estimated_date DateTime
-  cost           Int
-  curency        Currency     @default(EUR)
-  completed      Boolean      @default(false)
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @default(now())
-  goal           NewYearGoals @relation(fields: [newYearGoalId], references: [id])
-  newYearGoalId  String
+//   @@index([fireId])
+// }
 
-  @@index([newYearGoalId])
-}
+// model BucketList {
+//   id             String   @id @default(uuid())
+//   name           String
+//   estimated_date DateTime
+//   cost           Int
+//   currency       Currency @default(EUR)
+//   completed      Boolean  @default(false)
+//   createdAt      DateTime @default(now())
+//   updatedAt      DateTime @default(now())
+//   user           User     @relation(fields: [userId], references: [id])
+//   userId         String
 
-model CashAsset {
-  id                        String            @id @default(uuid())
-  category                  CashAssetCategory
-  currency                  Currency          @default(EUR)
-  stored_place              String
-  interest_rate             Int
-  deposit_contract_end_date DateTime
-  amount                    Int
-  createdAt                 DateTime          @default(now())
-  updatedAt                 DateTime          @default(now())
-  user                      User              @relation(fields: [userId], references: [id])
-  userId                    String
+//   @@index([userId])
+// }
 
-  @@index([userId])
-}
+// model NewYearGoals {
+//   id             String     @id @default(uuid())
+//   name           String
+//   estimated_date DateTime
+//   cost           Int
+//   curency        Currency   @default(EUR)
+//   completed      Boolean    @default(false)
+//   createdAt      DateTime   @default(now())
+//   updatedAt      DateTime   @default(now())
+//   user           User       @relation(fields: [userId], references: [id])
+//   userId         String
+//   subGoals       SubGoals[]
 
-model EquitiesAsset {
-  id                          String         @id @default(uuid())
-  category                    EquityCategory
-  stock_ticker                String
-  stock_ticker_logo           String? // TODO: this will neeed to be a file (link to google cloud storage or smthg?)
-  stored_place                String
-  stored_place_logo           String? // TODO: this will neeed to be a file (link to google cloud storage or smthg?)
-  initial_cost                Int
-  amount                      Int
-  currency                    Currency       @default(EUR)
-  transaction_cost_bought     Int
-  currency_exange_cost_bought Int
-  transaction_cost_sold       Int
-  currency_exange_cost_sold   Int
-  createdAt                   DateTime       @default(now())
-  updatedAt                   DateTime       @default(now())
+//   @@index([userId])
+// }
 
-  user                      User                        @relation(fields: [userId], references: [id])
-  userId                    String
-  EquitiesDividentsPayments EquitiesDividentsPayments[]
+// model SubGoals {
+//   id             String       @id @default(uuid())
+//   name           String
+//   estimated_date DateTime
+//   cost           Int
+//   curency        Currency     @default(EUR)
+//   completed      Boolean      @default(false)
+//   createdAt      DateTime     @default(now())
+//   updatedAt      DateTime     @default(now())
+//   goal           NewYearGoals @relation(fields: [newYearGoalId], references: [id])
+//   newYearGoalId  String
 
-  @@index([userId])
-}
+//   @@index([newYearGoalId])
+// }
 
-model BondAsset {
-  id                          String                @id @default(uuid())
-  category                    BondCategory
-  bond_ticker                 String
-  bond_ticker_logo            String? // TODO: this will neeed to be a file (link to google cloud storage or smthg?)
-  stored_place                String
-  stored_place_logo           String? // TODO: this will neeed to be a file (link to google cloud storage or smthg?)
-  initial_cost                Int
-  amount                      Int
-  currency                    Currency              @default(EUR)
-  transaction_cost_bought     Int
-  currency_exange_cost_bought Int
-  transaction_cost_sold       Int
-  currency_exange_cost_sold   Int
-  createdAt                   DateTime              @default(now())
-  updatedAt                   DateTime              @default(now())
-  user                        User                  @relation(fields: [userId], references: [id])
-  userId                      String
-  BondCouponsPayments         BondCouponsPayments[]
+// model CashAsset {
+//   id                        String            @id @default(uuid())
+//   category                  CashAssetCategory
+//   currency                  Currency          @default(EUR)
+//   stored_place              String
+//   interest_rate             Int
+//   deposit_contract_end_date DateTime
+//   amount                    Int
+//   createdAt                 DateTime          @default(now())
+//   updatedAt                 DateTime          @default(now())
+//   user                      User              @relation(fields: [userId], references: [id])
+//   userId                    String
 
-  @@index([userId])
-}
+//   @@index([userId])
+// }
 
-model RealEstate {
-  id                         String             @id @default(uuid())
-  real_estate_type           RealEstateType
-  name                       String
-  address                    String
-  total_price                Int
-  currency                   Currency           @default(EUR)
-  current_price_estimation   Int
-  initial_cost_payed         Int
-  acquiring_real_estate_cost Int
-  real_estate_taxes          Int
-  transaction_cost_sold      Int
-  currency_exange_cost_sold  Int
-  createdAt                  DateTime           @default(now())
-  updatedAt                  DateTime           @default(now())
-  user                       User               @relation(fields: [userId], references: [id])
-  userId                     String
-  morgage                    Morgage[]
-  maintenanceCosts           MaintenanceCosts[]
-  rent                       Rent[]
+// model EquitiesAsset {
+//   id                          String         @id @default(uuid())
+//   category                    EquityCategory
+//   stock_ticker                String
+//   stock_ticker_logo           String? // TODO: this will neeed to be a file (link to google cloud storage or smthg?)
+//   stored_place                String
+//   stored_place_logo           String? // TODO: this will neeed to be a file (link to google cloud storage or smthg?)
+//   initial_cost                Int
+//   amount                      Int
+//   currency                    Currency       @default(EUR)
+//   transaction_cost_bought     Int
+//   currency_exange_cost_bought Int
+//   transaction_cost_sold       Int
+//   currency_exange_cost_sold   Int
+//   createdAt                   DateTime       @default(now())
+//   updatedAt                   DateTime       @default(now())
 
-  @@index([userId])
-}
+//   user                      User                        @relation(fields: [userId], references: [id])
+//   userId                    String
+//   EquitiesDividentsPayments EquitiesDividentsPayments[]
 
-model Morgage {
-  id                      String     @id @default(uuid())
-  morgageStartDate        DateTime
-  morgageEndDate          DateTime
-  morgageProvider         String
-  morgageSum              Int
-  interstetOnMorgageTotal Int // TODO: question: should we have this field?
-  interstetChangeDate     DateTime
-  bankInterest            Int
-  euriborInterest         Int
-  morgageMonthlyPayments  Int
-  currency                Currency   @default(EUR)
-  createdAt               DateTime   @default(now())
-  updatedAt               DateTime   @default(now())
-  realEstate              RealEstate @relation(fields: [realEstateId], references: [id])
-  realEstateId            String
+//   @@index([userId])
+// }
 
-  @@index([realEstateId])
-}
+// model BondAsset {
+//   id                          String                @id @default(uuid())
+//   category                    BondCategory
+//   bond_ticker                 String
+//   bond_ticker_logo            String? // TODO: this will neeed to be a file (link to google cloud storage or smthg?)
+//   stored_place                String
+//   stored_place_logo           String? // TODO: this will neeed to be a file (link to google cloud storage or smthg?)
+//   initial_cost                Int
+//   amount                      Int
+//   currency                    Currency              @default(EUR)
+//   transaction_cost_bought     Int
+//   currency_exange_cost_bought Int
+//   transaction_cost_sold       Int
+//   currency_exange_cost_sold   Int
+//   createdAt                   DateTime              @default(now())
+//   updatedAt                   DateTime              @default(now())
+//   user                        User                  @relation(fields: [userId], references: [id])
+//   userId                      String
+//   BondCouponsPayments         BondCouponsPayments[]
 
-model Metals {
-  id                          String     @id @default(uuid())
-  metal_type                  MetalType
-  metal_logo                  String? // TODO: this will neeed to be a file (link to google cloud storage or smthg?)
-  metal_state                 MetalState
-  stored_place                String
-  stored_place_logo           String? // TODO: this will neeed to be a file (link to google cloud storage or smthg?)
-  initial_cost                Int
-  currency                    Currency   @default(EUR)
-  transaction_cost_bought     Int
-  currency_exange_cost_bought Int
-  transaction_cost_sold       Int
-  currency_exange_cost_sold   Int
-  units                       Int
-  karats                      Int
-  createdAt                   DateTime   @default(now())
-  updatedAt                   DateTime   @default(now())
-  user                        User       @relation(fields: [userId], references: [id])
-  userId                      String
+//   @@index([userId])
+// }
 
-  @@index([userId])
-}
+// model RealEstate {
+//   id                         String             @id @default(uuid())
+//   real_estate_type           RealEstateType
+//   name                       String
+//   address                    String
+//   total_price                Int
+//   currency                   Currency           @default(EUR)
+//   current_price_estimation   Int
+//   initial_cost_payed         Int
+//   acquiring_real_estate_cost Int
+//   real_estate_taxes          Int
+//   transaction_cost_sold      Int
+//   currency_exange_cost_sold  Int
+//   createdAt                  DateTime           @default(now())
+//   updatedAt                  DateTime           @default(now())
+//   user                       User               @relation(fields: [userId], references: [id])
+//   userId                     String
+//   morgage                    Morgage[]
+//   maintenanceCosts           MaintenanceCosts[]
+//   rent                       Rent[]
 
-model Crypto {
-  id                          String                    @id @default(uuid())
-  crypto_ticker               String
-  crypto_ticker_logo          String? // TODO: this will neeed to be a file (link to google cloud storage or smthg?)
-  stored_place                String
-  stored_place_logo           String? // TODO: this will neeed to be a file (link to google cloud storage or smthg?)
-  initial_cost                Int
-  currency                    Currency                  @default(EUR)
-  transaction_cost_bought     Int
-  currency_exange_cost_bought Int
-  transaction_cost_sold       Int
-  currency_exange_cost_sold   Int
-  amount                      Int
-  createdAt                   DateTime                  @default(now())
-  updatedAt                   DateTime                  @default(now())
-  user                        User                      @relation(fields: [userId], references: [id])
-  userId                      String
-  CryptoDividentsPayments     CryptoDividentsPayments[]
+//   @@index([userId])
+// }
 
-  @@index([userId])
-}
+// model Morgage {
+//   id                      String     @id @default(uuid())
+//   morgageStartDate        DateTime
+//   morgageEndDate          DateTime
+//   morgageProvider         String
+//   morgageSum              Int
+//   interstetOnMorgageTotal Int // TODO: question: should we have this field?
+//   interstetChangeDate     DateTime
+//   bankInterest            Int
+//   euriborInterest         Int
+//   morgageMonthlyPayments  Int
+//   currency                Currency   @default(EUR)
+//   createdAt               DateTime   @default(now())
+//   updatedAt               DateTime   @default(now())
+//   realEstate              RealEstate @relation(fields: [realEstateId], references: [id])
+//   realEstateId            String
 
-model BondCouponsPayments {
-  id           String    @id @default(uuid())
-  payment_date DateTime
-  sum          Int
-  currency     Currency  @default(EUR)
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @default(now())
-  bond         BondAsset @relation(fields: [bondAssetId], references: [id])
-  bondAssetId  String
+//   @@index([realEstateId])
+// }
 
-  @@index([bondAssetId])
-}
+// model Metals {
+//   id                          String     @id @default(uuid())
+//   metal_type                  MetalType
+//   metal_logo                  String? // TODO: this will neeed to be a file (link to google cloud storage or smthg?)
+//   metal_state                 MetalState
+//   stored_place                String
+//   stored_place_logo           String? // TODO: this will neeed to be a file (link to google cloud storage or smthg?)
+//   initial_cost                Int
+//   currency                    Currency   @default(EUR)
+//   transaction_cost_bought     Int
+//   currency_exange_cost_bought Int
+//   transaction_cost_sold       Int
+//   currency_exange_cost_sold   Int
+//   units                       Int
+//   karats                      Int
+//   createdAt                   DateTime   @default(now())
+//   updatedAt                   DateTime   @default(now())
+//   user                        User       @relation(fields: [userId], references: [id])
+//   userId                      String
 
-model EquitiesDividentsPayments {
-  id              String        @id @default(uuid())
-  payment_date    DateTime
-  sum             Int
-  currency        Currency      @default(EUR)
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @default(now())
-  equities        EquitiesAsset @relation(fields: [equitiesAssetId], references: [id])
-  equitiesAssetId String
+//   @@index([userId])
+// }
 
-  @@index([equitiesAssetId])
-}
+// model Crypto {
+//   id                          String                    @id @default(uuid())
+//   crypto_ticker               String
+//   crypto_ticker_logo          String? // TODO: this will neeed to be a file (link to google cloud storage or smthg?)
+//   stored_place                String
+//   stored_place_logo           String? // TODO: this will neeed to be a file (link to google cloud storage or smthg?)
+//   initial_cost                Int
+//   currency                    Currency                  @default(EUR)
+//   transaction_cost_bought     Int
+//   currency_exange_cost_bought Int
+//   transaction_cost_sold       Int
+//   currency_exange_cost_sold   Int
+//   amount                      Int
+//   createdAt                   DateTime                  @default(now())
+//   updatedAt                   DateTime                  @default(now())
+//   user                        User                      @relation(fields: [userId], references: [id])
+//   userId                      String
+//   CryptoDividentsPayments     CryptoDividentsPayments[]
 
-model CryptoDividentsPayments {
-  id           String   @id @default(uuid())
-  payment_date DateTime
-  sum          Int
-  currency     Currency @default(EUR)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @default(now())
-  cryptoId     String
-  Crypto       Crypto   @relation(fields: [cryptoId], references: [id])
+//   @@index([userId])
+// }
 
-  @@index([cryptoId])
-}
+// model BondCouponsPayments {
+//   id           String    @id @default(uuid())
+//   payment_date DateTime
+//   sum          Int
+//   currency     Currency  @default(EUR)
+//   createdAt    DateTime  @default(now())
+//   updatedAt    DateTime  @default(now())
+//   bond         BondAsset @relation(fields: [bondAssetId], references: [id])
+//   bondAssetId  String
 
-model MaintenanceCosts {
-  id           String     @id @default(uuid())
-  type         UtilyType
-  who_paid     WhoPaid
-  description  String
-  data         DateTime
-  cost         Int
-  currency     Currency   @default(EUR)
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @default(now())
-  realEstateId String
-  RealEstate   RealEstate @relation(fields: [realEstateId], references: [id])
+//   @@index([bondAssetId])
+// }
 
-  @@index([realEstateId])
-}
+// model EquitiesDividentsPayments {
+//   id              String        @id @default(uuid())
+//   payment_date    DateTime
+//   sum             Int
+//   currency        Currency      @default(EUR)
+//   createdAt       DateTime      @default(now())
+//   updatedAt       DateTime      @default(now())
+//   equities        EquitiesAsset @relation(fields: [equitiesAssetId], references: [id])
+//   equitiesAssetId String
 
-model Rent {
-  id               String     @id @default(uuid())
-  first_name       String
-  last_name        String
-  contact_ref      String
-  rent_start_date  DateTime
-  planned_end_date DateTime
-  rent_end_date    DateTime
-  rent_sum         Int
-  deposit_paid     Int
-  currency         Currency   @default(EUR)
-  createdAt        DateTime   @default(now())
-  updatedAt        DateTime   @default(now())
-  realEstateId     String
-  RealEstate       RealEstate @relation(fields: [realEstateId], references: [id])
+//   @@index([equitiesAssetId])
+// }
 
-  @@index([realEstateId])
-}
+// model CryptoDividentsPayments {
+//   id           String   @id @default(uuid())
+//   payment_date DateTime
+//   sum          Int
+//   currency     Currency @default(EUR)
+//   createdAt    DateTime @default(now())
+//   updatedAt    DateTime @default(now())
+//   cryptoId     String
+//   Crypto       Crypto   @relation(fields: [cryptoId], references: [id])
+
+//   @@index([cryptoId])
+// }
+
+// model MaintenanceCosts {
+//   id           String     @id @default(uuid())
+//   type         UtilyType
+//   who_paid     WhoPaid
+//   description  String
+//   data         DateTime
+//   cost         Int
+//   currency     Currency   @default(EUR)
+//   createdAt    DateTime   @default(now())
+//   updatedAt    DateTime   @default(now())
+//   realEstateId String
+//   RealEstate   RealEstate @relation(fields: [realEstateId], references: [id])
+
+//   @@index([realEstateId])
+// }
+
+// model Rent {
+//   id               String     @id @default(uuid())
+//   first_name       String
+//   last_name        String
+//   contact_ref      String
+//   rent_start_date  DateTime
+//   planned_end_date DateTime
+//   rent_end_date    DateTime
+//   rent_sum         Int
+//   deposit_paid     Int
+//   currency         Currency   @default(EUR)
+//   createdAt        DateTime   @default(now())
+//   updatedAt        DateTime   @default(now())
+//   realEstateId     String
+//   RealEstate       RealEstate @relation(fields: [realEstateId], references: [id])
+
+//   @@index([realEstateId])
+// }
