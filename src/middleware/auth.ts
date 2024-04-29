@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express'
 import { auth } from 'express-oauth2-jwt-bearer'
 import jwt from 'jsonwebtoken'
-import User from '../models/user'
+import { db } from '../db/db'
 
 declare global {
 	namespace Express {
@@ -25,8 +25,8 @@ export const jwtParse = async (
 ) => {
 	const { authorization } = req.headers
 
-	if (!authorization || !authorization.startsWith('Bearer '))
-		return res.sendStatus(401)
+	if (!authorization || !authorization.startsWith('Bearer'))
+		return res.status(401)
 
 	const token = authorization.split(' ')[1]
 
@@ -34,14 +34,16 @@ export const jwtParse = async (
 		const decoded = jwt.decode(token) as jwt.JwtPayload
 		const auth0Id = decoded.sub
 
-		const user = await User.findOne({ auth0Id })
+		const user = await db.user.findFirst({ where: { auth0Id } })
 
-		if (!user) return res.sendStatus(401)
+		if (!user) {
+			return res.sendStatus(401)
+		}
 
-		req.auth0Id = auth0Id as string
-		req.userId = user._id.toString()
+		req.auth0Id = auth0Id
+		req.userId = user.id.toString()
 		next()
 	} catch (error) {
-		return res.sendStatus(401)
+		res.sendStatus(401)
 	}
 }

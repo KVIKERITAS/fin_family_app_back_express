@@ -202,7 +202,6 @@ model User {
 //   outcomeSum Int // this should be calculated from transactions
 //   user       User     @relation(fields: [userId], references: [id])
 //   userId     String
-
 //   @@index([userId])
 // }
 
@@ -213,6 +212,7 @@ model User {
 //   category    TransactionCategory
 //   description String?
 //   currency    Currency            @default(EUR)
+
 //   createAt    DateTime            @default(now())
 //   updateAt    DateTime            @default(now())
 //   user        User                @relation(fields: [userId], references: [id])
