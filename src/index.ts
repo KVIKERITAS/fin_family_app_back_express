@@ -1,7 +1,7 @@
 import bodyParser from 'body-parser'
 import cors from 'cors'
 import * as dotenv from 'dotenv'
-import express from 'express'
+import express, { Request, Response } from 'express'
 import http from 'http'
 import MyUserRoute from './routes/MyUserRoute'
 
@@ -14,6 +14,10 @@ app.use(cors())
 app.use(bodyParser.json())
 
 const server = http.createServer(app)
+
+app.get('/health', async (req: Request, res: Response) => {
+	res.send({ message: 'health OK!' })
+})
 
 app.use('/api/my/user', MyUserRoute)
 
