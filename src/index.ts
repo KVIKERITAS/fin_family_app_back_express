@@ -3,6 +3,7 @@ import cors from 'cors'
 import * as dotenv from 'dotenv'
 import express, { Request, Response } from 'express'
 import http from 'http'
+import MyTransactionRoute from './routes/MyTransactionRoute'
 import MyUserRoute from './routes/MyUserRoute'
 
 dotenv.config()
@@ -20,6 +21,7 @@ app.get('/health', async (req: Request, res: Response) => {
 })
 
 app.use('/api/my/user', MyUserRoute)
+app.use('/api/my/transaction', MyTransactionRoute)
 
 server.listen(PORT, () => {
 	console.log(`Server running on http://localhost:${PORT}`)
