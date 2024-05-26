@@ -220,13 +220,13 @@ model Transactions {
 }
 
 model TransactionCategory {
-  id            String          @id @default(uuid())
+  id            String         @id @default(uuid())
   name          String
   icon          String
-  type          TransactionType
+  type          String         @default("income")
   userId        String
-  transactionId String
-  User          User            @relation(fields: [userId], references: [id])
+  transactionId String?
+  User          User           @relation(fields: [userId], references: [id])
   Transactions  Transactions[]
 
   @@index([userId])

@@ -5,6 +5,13 @@ import { validateMyTransactionCategoryRequest } from '../middleware/validation'
 
 const router = express.Router()
 
+router.get(
+	'/category/:type',
+	jwtCheck,
+	jwtParse,
+	MyTransactionController.getTransactionCategories,
+)
+
 router.post(
 	'/category',
 	jwtCheck,
