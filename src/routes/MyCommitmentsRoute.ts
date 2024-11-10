@@ -5,7 +5,7 @@ import { jwtCheck, jwtParse } from '../middleware/auth'
 const router = express.Router()
 
 router.post(
-	'/newCommitment/:type',
+	'/newCommitment',
 	jwtCheck,
 	jwtParse,
 	MyCommitmentController.createNewCommitment,

@@ -45,12 +45,12 @@ enum UserRole {
 enum PaymentFrequency {
   yearly
   quarterly
-  montly
+  monthly
   one_payment
 }
 
 enum CommitmentType {
-  loan_dept
+  debt
   lease
   insurance
   subscription
@@ -126,8 +126,8 @@ enum UtilyType {
   internet
   television
   phone
-  wasteDisposal
-  homeSecurity
+  waste_disposal
+  home_security
   maintenance
   other
 }
@@ -152,14 +152,14 @@ model User {
   // name            String
   // email           String            @unique
   // image           String?
-  // createAt        DateTime          @default(now())
-  // updateAt        DateTime          @default(now())
+  create_at        DateTime          @default(now())
+  update_at        DateTime          @default(now())
   // hash            String
   // role            UserRole          @default(USER)
   // accounts        Account[]
   transactions        Transactions[]
   // PersonalFinance PersonalFinance[]
-  // Comitments      Commitments[]
+  commitments      Commitments[]
   // Fire            Fire[]
   // bucketList      BucketList[]
   // newYearGoals    NewYearGoals[]
@@ -169,7 +169,7 @@ model User {
   // realEstate      RealEstate[]
   // metals          Metals[]
   // crypto          Crypto[]
-  TransactionCategory TransactionCategory[]
+  transactionCategories TransactionCategory[]
 
   @@map("users")
 }
@@ -223,7 +223,7 @@ model TransactionCategory {
   id            String         @id @default(uuid())
   name          String
   icon          String
-  type          String         @default("income")
+  type          TransactionType  
   userId        String
   transactionId String?
   User          User           @relation(fields: [userId], references: [id])
@@ -231,7 +231,25 @@ model TransactionCategory {
 
   @@index([userId])
 }
+model Commitments {
+  id               String           @id @default(uuid())
+  type             CommitmentType
+  name             String
+  // initial_payment  Int
+  commitment_start DateTime         @default(now())
+  commitment_end   DateTime?
+  // payment_date     DateTime         @default(now())
+  // currency         Currency         @default(EUR)
+  fee_type         PaymentFrequency
+  fee              Int  
+  interest_rate    Float?
+  created_at        DateTime         @default(now())
+  updated_at        DateTime         @default(now())
+  user             User             @relation(fields: [userId], references: [id])
+  userId           String
 
+  @@index([userId])
+}
 // model Transactions {
 //   id       String              @id @default(uuid())
 //   // sum         Int
@@ -254,26 +272,7 @@ model TransactionCategory {
 // //   Commitments Commitments
 // // }
 
-// model Commitments {
-//   id               String           @id @default(uuid())
-//   type             CommitmentType
-//   name             String
-//   initial_payment  Int?
-//   commitment_start DateTime         @default(now())
-//   commitment_end   DateTime?
-//   payment_date     DateTime         @default(now())
-//   currency         Currency         @default(EUR)
-//   fee_type         PaymentFrequency
-//   fee              Int //TODO:  why did we left price in the table too?
-//   interest_rate    Int?
-//   // sum_left         Int // TODO: this should be calculated from the initial_payment and payments made so far and months left to pay?
-//   createdAt        DateTime         @default(now())
-//   updatedAt        DateTime         @default(now())
-//   user             User             @relation(fields: [userId], references: [id])
-//   userId           String
 
-//   @@index([userId])
-// }
 
 // // TODO: Question: why do we need fire table? should be enough to have toHave, retirementIncome and lifestyle tables
 // model Fire {
@@ -473,6 +472,7 @@ model TransactionCategory {
 //   morgageEndDate          DateTime
 //   morgageProvider         String
 //   morgageSum              Int
+// initial_payment ar dadet cia??
 //   interstetOnMorgageTotal Int // TODO: question: should we have this field?
 //   interstetChangeDate     DateTime
 //   bankInterest            Int

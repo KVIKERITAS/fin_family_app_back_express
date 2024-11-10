@@ -1,5 +1,7 @@
+import { TransactionType } from '@prisma/client'
 import { Request, Response } from 'express'
 import { db } from '../db/db'
+import { EnumTransactionTypeFilter } from '../lib/types' // Adjust the import path as necessary
 
 const getTransactionCategories = async (req: Request, res: Response) => {
 	try {
@@ -12,7 +14,12 @@ const getTransactionCategories = async (req: Request, res: Response) => {
 		}
 
 		const categories = await db.transactionCategory.findMany({
-			where: { userId: user.id, type: type },
+			where: {
+				userId: user.id,
+				type: type as
+					| EnumTransactionTypeFilter<'TransactionCategory'>
+					| TransactionType,
+			},
 		})
 
 		res.status(200).json(categories)
