@@ -1,0 +1,1 @@
+export type EnumTransactionTypeFilter<T> = T extends 'TransactionCategory'
