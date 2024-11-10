@@ -235,16 +235,17 @@ model Commitments {
   id               String           @id @default(uuid())
   type             CommitmentType
   name             String
-  // initial_payment  Int
+  initial_payment  Float?
   commitment_start DateTime         @default(now())
   commitment_end   DateTime?
   // payment_date     DateTime         @default(now())
   // currency         Currency         @default(EUR)
+  full_sum         Float?
   fee_type         PaymentFrequency
-  fee              Int  
+  fee              Float  
   interest_rate    Float?
-  created_at        DateTime         @default(now())
-  updated_at        DateTime         @default(now())
+  created_at       DateTime         @default(now())
+  updated_at       DateTime         @default(now())
   user             User             @relation(fields: [userId], references: [id])
   userId           String
 
