@@ -17,6 +17,8 @@ const createNewCommitment = async (req: Request, res: Response) => {
 			commitmentStart,
 			commitmentEnds,
 			interestRate,
+			fullSum,
+			initialPayment,
 		} = req.body
 
 		await db.commitments.create({
@@ -29,6 +31,8 @@ const createNewCommitment = async (req: Request, res: Response) => {
 				commitment_start: commitmentStart,
 				commitment_end: commitmentEnds ? commitmentEnds : null,
 				interest_rate: interestRate ? interestRate : null,
+				full_sum: fullSum ? fullSum : null,
+				initial_payment: initialPayment ? initialPayment : null,
 			},
 		})
 
